@@ -1,7 +1,7 @@
 module.exports = {
   entry: './components/maps.jsx',
   output: {
-    filename: './bundle.js'
+    filename: './public/bundle.js'
   },
   module: {
     loaders: [{
