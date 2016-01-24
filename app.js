@@ -7,7 +7,9 @@ var Mongoose = require('mongoose')
 Mongoose.connect('mongodb://root:root@ds047095.mongolab.com:47095/heroku_bgc82cxd')
 
 var Location = require('./models/location')
-new Location({'name': 'Craiova'}).save()
+Location
+  .update({'profile': 'default'}, {$set: {'places': 'Bucuresti'}}, {upsert: true})
+  .exec(function() {})
 
 
 app.set('views', __dirname + '/views');
@@ -16,6 +18,22 @@ app.use(express.static(__dirname + '/public'));
 
 app.get('/', function(req, res) {
     res.render('index.html');
+});
+app.get('/remote', function(req, res) {
+    res.render('remote.html');
+});
+
+app.get('/put_directions', function(req, res) {
+    Location
+      .update({'profile': 'default'}, {$set: {'places': req.query.places}}, {upsert: true})
+      .exec(function() {})
+});
+app.get('/directions', function(req, res) {
+    Location.findOne({'profile': 'default'}).exec(gotDirections)
+
+    function gotDirections (err, dirs) {
+        res.send(dirs)
+    }
 });
 
 app.listen(process.env.PORT || 3000, function () {

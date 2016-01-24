@@ -49,100 +49,81 @@
 	var Component = __webpack_require__(1).Component
 
 	var GoogleMap = __webpack_require__(159).GoogleMap
-	var Marker = __webpack_require__(159).Marker
-	var SearchBox = __webpack_require__(159).SearchBox
 	var DirectionsRenderer = __webpack_require__(159).DirectionsRenderer
 
 
-	/*
-	 * https://developers.google.com/maps/documentation/javascript/examples/places-searchbox
-	 *
-	 * Add <script src="https://maps.googleapis.com/maps/api/js"></script> to your HTML to provide google.maps reference
-	 */
-
-
-	var mapCenter = {
-	  "lat": 47.6205588,
-	  "lng": -122.3212725
-	}
-
-	var inputStyle = {
-	  "border": "1px solid transparent",
-	  "borderRadius": "1px",
-	  "boxShadow": "0 2px 6px rgba(0, 0, 0, 0.3)",
-	  "boxSizing": "border-box",
-	  "MozBoxSizing": "border-box",
-	  "fontSize": "14px",
-	  "height": "32px",
-	  "marginTop": "27px",
-	  "outline": "none",
-	  "padding": "0 12px",
-	  "textOverflow": "ellipses",
-	  "width": "400px"
-	}
+	const REFRESH_INTERVAL = 5000;
 
 
 	var PiMaps = React.createClass({displayName: "PiMaps",
 	  getInitialState: function() {
 	    return {
-	      origin: "Brasov", //new google.maps.LatLng(41.8507300, -87.6512600),
-	      destination: "Craiova", //new google.maps.LatLng(41.8525800, -87.6514100),
-	      directions: null,
-	      waypoints: [
-	        {
-	         location:"Sibiu",
-	         stopover:true
-	       }],
+	      origin      : '',
+	      destination : '',
+	      directions  : null,
+	      waypoints   : [],
 	    };
 	  },
 
-	  handleBoundsChanged: function () {
-	    this.setState({
-	      bounds: this.refs.map.getBounds(),
-	      center: this.refs.map.getCenter()
-	    });
-	  },
+	  getDirections: function () {
+	    $.get('/directions', function(res) {
+	      var places = res.places.split(',');
 
-	  handlePlacesChanged: function () {
-	    const places = this.refs.searchBox.getPlaces();
-	    const markers = [];
+	        // Define empty state
+	        var newState = {
+	          origin      : '',
+	          destination : '',
+	          directions  : null,
+	          waypoints   : []
+	        };
 
-	    // Add a marker for each place returned from search bar
-	    places.forEach(function (place) {
-	      markers.push({
-	        position: place.geometry.location
-	      });
-	    });
+	        // Set navigation origin
+	        if (places[0]) newState.origin = places[0];
 
-	    // Set markers; set map center to first search result
-	    const mapCenter = markers.length > 0 ? markers[0].position : this.state.center;
+	        // Set navigation destination
+	        if (places.length > 1) {
+	          newState.destination = places[places.length-1];
+	        } else {
+	          newState.destination = places[0];
+	        }
 
-	    this.setState({
-	      center: mapCenter,
-	      markers: markers
-	    });
+	        // Set navigation waypoints
+	        if (places.length > 2) {
+	          for (i=1; i<places.length-1; i++)
+	            newState.waypoints.push({
+	              location: places[i],
+	              stopover: true
+	            });
+	        }
 
-	    return;
+
+	      if (newState.origin != this.state.origin ||
+	          newState.destination != this.state.destination ||
+	          newState.waypoints.join() != this.state.waypoints.join()) {
+	        // Set new state
+	        this.setState(newState);
+
+	        // Refresh map
+	        const DirectionsService = new google.maps.DirectionsService();
+	        DirectionsService.route({
+	          origin      : this.state.origin,
+	          destination : this.state.destination,
+	          waypoints   : this.state.waypoints,
+	          travelMode  : google.maps.TravelMode.DRIVING
+	        }, (result, status) => {
+	          if(status == google.maps.DirectionsStatus.OK) {
+	            this.setState({ directions: result });
+	          } else {
+	            console.error(`error fetching directions ${ result }`);
+	          }
+	        });
+	      };
+	    }.bind(this))
 	  },
 
 	  componentDidMount: function () {
-	    const DirectionsService = new google.maps.DirectionsService();
-
-	    DirectionsService.route({
-	      origin: this.state.origin,
-	      destination: this.state.destination,
-	      waypoints: this.state.waypoints,
-	      travelMode: google.maps.TravelMode.DRIVING
-	    }, (result, status) => {
-	      if(status == google.maps.DirectionsStatus.OK) {
-	        this.setState({
-	          directions: result
-	        })
-	      }
-	      else {
-	        console.error(`error fetching directions ${ result }`);
-	      }
-	    });
+	    this.getDirections();
+	    setInterval(this.getDirections, REFRESH_INTERVAL);
 	  },
 
 	  render: function () {
@@ -150,21 +131,44 @@
 	    const directions = this.state.directions
 
 	    return (
-	      React.createElement(GoogleMap, {containerProps: {
-	          style: {
-	            height: "100%",
-	          },
-	        }, 
-	        defaultZoom: 7, 
-	        defaultCenter: origin}, 
+	      React.createElement(GoogleMap, {
+	        containerProps: { style: { height: "100%" }}, 
+	        defaultZoom: 6, 
+	        defaultCenter: {lat: -25.363882, lng: 131.044922}}, 
 	        directions ? React.createElement(DirectionsRenderer, {directions: directions}) : null
 	      )
 	    );
 	  }
 
-	})
+	});
 
-	ReactDOM.render((React.createElement(PiMaps, null)), document.getElementById("main"))
+	var PiMapsRemote = React.createClass({displayName: "PiMapsRemote",
+	  handlePlaceChange: function (event) {
+	    $.get('/put_directions?places=' + event.target.value, function(res) {})
+	  },
+
+	  render: function () {
+	    return (
+	      React.createElement("div", {style: {margin: '20% auto 0px auto'}}, 
+	        React.createElement("h2", null, "PiMaps"), 
+	        React.createElement("p", null, "Add your route:"), 
+	        React.createElement("input", {
+	          type: "text", 
+	          placeholder: "Places (separated by a comma)", 
+	          style: {
+	            width: '100%',
+	            fontSize: '16px'
+	          }, 
+	          onChange: this.handlePlaceChange})
+	      )
+	    );
+	  }
+	});
+
+	if (document.getElementById("main"))
+	  ReactDOM.render((React.createElement(PiMaps, null)), document.getElementById("main"))
+	if (document.getElementById("remote"))
+	  ReactDOM.render((React.createElement(PiMapsRemote, null)), document.getElementById("remote"))
 
 
 /***/ },
