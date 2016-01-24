@@ -6,7 +6,7 @@ var GoogleMap = require("react-google-maps").GoogleMap
 var DirectionsRenderer = require("react-google-maps").DirectionsRenderer
 
 
-const REFRESH_INTERVAL = 5000;
+const REFRESH_INTERVAL = 4000;
 
 
 var PiMaps = React.createClass({

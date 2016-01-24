@@ -27,6 +27,7 @@ app.get('/put_directions', function(req, res) {
     Location
       .update({'profile': 'default'}, {$set: {'places': req.query.places}}, {upsert: true})
       .exec(function() {})
+    res.send('ok')
 });
 app.get('/directions', function(req, res) {
     Location.findOne({'profile': 'default'}).exec(gotDirections)

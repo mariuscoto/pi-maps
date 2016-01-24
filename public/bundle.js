@@ -52,7 +52,7 @@
 	var DirectionsRenderer = __webpack_require__(159).DirectionsRenderer
 
 
-	const REFRESH_INTERVAL = 5000;
+	const REFRESH_INTERVAL = 4000;
 
 
 	var PiMaps = React.createClass({displayName: "PiMaps",
@@ -155,10 +155,7 @@
 	        React.createElement("input", {
 	          type: "text", 
 	          placeholder: "Places (separated by a comma)", 
-	          style: {
-	            width: '100%',
-	            fontSize: '16px'
-	          }, 
+	          style: { width: '100%', fontSize: '16px'}, 
 	          onChange: this.handlePlaceChange})
 	      )
 	    );
