@@ -96,27 +96,6 @@ var PiMaps = React.createClass({
 
 });
 
-var PiMapsRemote = React.createClass({
-  handlePlaceChange: function (event) {
-    $.get('/put_directions?places=' + event.target.value, function(res) {})
-  },
-
-  render: function () {
-    return (
-      <div style={{margin: '20% auto 0px auto'}}>
-        <h2>PiMaps</h2>
-        <p>Add your route:</p>
-        <input
-          type="text"
-          placeholder='Places (separated by a comma)'
-          style={{ width: '100%', fontSize: '16px' }}
-          onChange={this.handlePlaceChange}/>
-      </div>
-    );
-  }
-});
 
 if (document.getElementById("main"))
   ReactDOM.render((<PiMaps />), document.getElementById("main"))
-if (document.getElementById("remote"))
-  ReactDOM.render((<PiMapsRemote />), document.getElementById("remote"))

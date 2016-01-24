@@ -142,30 +142,9 @@
 
 	});
 
-	var PiMapsRemote = React.createClass({displayName: "PiMapsRemote",
-	  handlePlaceChange: function (event) {
-	    $.get('/put_directions?places=' + event.target.value, function(res) {})
-	  },
-
-	  render: function () {
-	    return (
-	      React.createElement("div", {style: {margin: '20% auto 0px auto'}}, 
-	        React.createElement("h2", null, "PiMaps"), 
-	        React.createElement("p", null, "Add your route:"), 
-	        React.createElement("input", {
-	          type: "text", 
-	          placeholder: "Places (separated by a comma)", 
-	          style: { width: '100%', fontSize: '16px'}, 
-	          onChange: this.handlePlaceChange})
-	      )
-	    );
-	  }
-	});
 
 	if (document.getElementById("main"))
 	  ReactDOM.render((React.createElement(PiMaps, null)), document.getElementById("main"))
-	if (document.getElementById("remote"))
-	  ReactDOM.render((React.createElement(PiMapsRemote, null)), document.getElementById("remote"))
 
 
 /***/ },

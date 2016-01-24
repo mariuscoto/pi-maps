@@ -7,7 +7,17 @@
   </head>
 
   <body>
-    <div id="remote"></div>
+    <h2>PiMaps</h2>
+    <p>Add your route:</p>
+    <form method='POST', action='/directions'>
+      <input
+        name="places",
+        type="text",
+        placeholder="Places (separated by a comma)",
+        style="width:100%; font-size:16px"/>
+      <br><br>
+      <input type='submit', value='Show'/>
+    </form>
     <script type="text/javascript", src="bundle.js"></script>
   </body>
 
