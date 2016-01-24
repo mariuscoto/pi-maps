@@ -24,14 +24,18 @@ app.get('/', function(req, res) {
     res.render('index.html');
 });
 app.get('/remote', function(req, res) {
-    res.render('remote.html');
+    res.render('remote.html', {
+      places: req.query.places || ''
+    });
 });
 app.post('/directions', function(req, res) {
-    console.log(req.body)
+    // Remove tailing ','
+    req.body.places = req.body.places.replace(/,+$/, "");
+
     Location
       .update({'profile': 'default'}, {$set: {'places': req.body.places}}, {upsert: true})
       .exec(function() {})
-    res.redirect('/remote')
+    res.redirect('/remote?places=' + req.body.places)
 });
 app.get('/directions', function(req, res) {
     Location.findOne({'profile': 'default'}).exec(gotDirections)
