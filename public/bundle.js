@@ -44,15 +44,19 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var React = __webpack_require__(1)
-	var ReactDOM = __webpack_require__(158)
+	var React     = __webpack_require__(1)
+	var ReactDOM  = __webpack_require__(158)
 	var Component = __webpack_require__(1).Component
 
-	var GoogleMap = __webpack_require__(159).GoogleMap
+
+	var GoogleMap  = __webpack_require__(159).GoogleMap
+	var InfoWindow = __webpack_require__(159).InfoWindow
+	var Circle     = __webpack_require__(159).Circle
 	var DirectionsRenderer = __webpack_require__(159).DirectionsRenderer
 
 
 	const REFRESH_INTERVAL = 4000;
+	const RADIUS_SIZE = 20;
 
 
 	var PiMaps = React.createClass({displayName: "PiMaps",
@@ -62,6 +66,8 @@
 	      destination : '',
 	      directions  : null,
 	      waypoints   : [],
+	      lat         : null,
+	      lng         : null
 	    };
 	  },
 
@@ -78,7 +84,18 @@
 	        };
 
 	        // Set navigation origin
-	        if (places[0]) newState.origin = places[0];
+	        if (places[0]) {
+	          // If coords given, use lat and lng
+	          if (places[0].split('/').length == 2) {
+	            console.log(places[0].split('/')[0])
+	            this.setState({
+	              lat: parseFloat(places[0].split('/')[0]),
+	              lng: parseFloat(places[0].split('/')[1])
+	            });
+	          } else {
+	            newState.origin = places[0];
+	          }
+	        }
 
 	        // Set navigation destination
 	        if (places.length > 1) {
@@ -127,14 +144,34 @@
 	  },
 
 	  render: function () {
-	    const origin = this.state.origin
-	    const directions = this.state.directions
+	    const origin     = this.state.origin;
+	    const directions = this.state.directions;
+
+	    const lat = this.state.lat;
+	    const lng = this.state.lng;
 
 	    return (
 	      React.createElement(GoogleMap, {
 	        containerProps: { style: { height: "100%" }}, 
-	        defaultZoom: 6, 
-	        defaultCenter: {lat: -25.363882, lng: 131.044922}}, 
+	        zoom: 40, 
+	        center:  lat ? {lat:lat, lng:lng} : ''}, 
+	        lat ? [
+	          (React.createElement(InfoWindow, {
+	            key: "info", 
+	            position: {lat:lat, lng:lng}, 
+	            content: "You are in this area"})),
+	          (React.createElement(Circle, {
+	            key: "circle", 
+	            center: {lat:lat, lng:lng}, 
+	            radius: RADIUS_SIZE, 
+	            options: {
+	              fillColor: "red",
+	              fillOpacity: 0.20,
+	              strokeColor: "red",
+	              strokeOpacity: 1,
+	              strokeWeight: 1,
+	            }})),
+	        ] : null, 
 	        directions ? React.createElement(DirectionsRenderer, {directions: directions}) : null
 	      )
 	    );

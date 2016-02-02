@@ -4,19 +4,38 @@
     <title>PiMaps Remote</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type="text/javascript" src="https://maps.google.com/maps/api/js?libraries=places"></script>
+
+    <script type="text/javascript">
+      function getMyLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(onSuccess, onErr);
+        } else {
+          alert("Geolocation is not supported!");
+        }
+      }
+      function onSuccess(event) {
+        var coords = event.coords.latitude + "/" + event.coords.longitude;
+        document.getElementById("places").value = coords;
+      }
+      function onErr(event) {
+        alert("Error (" + event.code + "):" + event.message);
+      }
+    </script>
   </head>
 
   <body>
     <h2>PiMaps</h2>
-    <p>Add your route:</p>
+    <p>Add your route or coordinates:</p>
     <form method='POST', action='/directions'>
       <input
+        id="places",
         name="places",
         type="text",
         value="<%= places %>",
         placeholder="Places (separated by a comma)",
         style="width:100%; font-size:16px"/>
       <br><br>
+      <input type='button', value='Use my location', onclick="getMyLocation()"/>
       <input type='submit', value='Show'/>
     </form>
     <script type="text/javascript", src="bundle.js"></script>
