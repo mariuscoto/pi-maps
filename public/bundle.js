@@ -87,7 +87,6 @@
 	        if (places[0]) {
 	          // If coords given, use lat and lng
 	          if (places[0].split('/').length == 2) {
-	            console.log(places[0].split('/')[0])
 	            this.setState({
 	              lat: parseFloat(places[0].split('/')[0]),
 	              lng: parseFloat(places[0].split('/')[1])
